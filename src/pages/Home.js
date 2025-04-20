@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { supabase } from "../supabase/client";
 import { useNavigate } from "react-router-dom";
+import TaskForm from "../components/TaskForm";
 
 function Home() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ function Home() {
     <div>
       <h1>Welcome to the Home Page</h1>
       <button onClick={handleLogout}>Logout</button>
+      <TaskForm />
     </div>
   );
 }
