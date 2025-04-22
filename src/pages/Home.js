@@ -2,9 +2,12 @@ import { useEffect } from "react";
 import { supabase } from "../supabase/client";
 import { useNavigate } from "react-router-dom";
 import TaskForm from "../components/TaskForm";
+import { useTask } from "../context/TaskContext";
 
 function Home() {
   const navigate = useNavigate();
+  const obj = useTask();
+  console.log(obj);
 
   useEffect(() => {
     const checkUser = async () => {
