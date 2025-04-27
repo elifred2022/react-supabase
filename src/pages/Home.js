@@ -2,12 +2,11 @@ import { useEffect } from "react";
 import { supabase } from "../supabase/client";
 import { useNavigate } from "react-router-dom";
 import TaskForm from "../components/TaskForm";
-import { useTask } from "../context/TaskContext";
+
+import TaskList from "../components/TaskList";
 
 function Home() {
   const navigate = useNavigate();
-  const obj = useTask();
-  console.log(obj);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -33,6 +32,7 @@ function Home() {
       <h1>Welcome to the Home Page</h1>
       <button onClick={handleLogout}>Logout</button>
       <TaskForm />
+      <TaskList />
     </div>
   );
 }
