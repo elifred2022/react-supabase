@@ -22,7 +22,8 @@ export const TaskContextProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from("task") // nombre de la tabla
-        .select("*"); // selecciona todas las columnas
+        .select("*") // selecciona todas las columnas
+        .eq("done", true); // solo tareas con done=true
 
       if (error) throw error;
 
@@ -33,13 +34,12 @@ export const TaskContextProvider = ({ children }) => {
     }
   };
 
-  // Opcional: cargar tareas automáticamente al iniciar
-  // useEffect(() => {
-  //   getTask();
-  // }, []);
+  useEffect(() => {
+    getTask(); // llamada al montar el componente
+  }, []);
 
   return (
-    <TaskContext.Provider value={{ name: "hello", task, getTask }}>
+    <TaskContext.Provider value={{ task, getTask }}>
       {children}
     </TaskContext.Provider>
   );
