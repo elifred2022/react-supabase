@@ -1,39 +1,14 @@
 import React, { useState } from "react";
-import { supabase } from "../supabase/client";
+import { useTask } from "../context/TaskContext"; // Ajusta el path si es necesario
 
 function TaskForm() {
   const [taskName, setTaskname] = useState("");
-  const [message, setMessage] = useState("");
+  const { addTask, message } = useTask();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        setMessage("Usuario no autenticado");
-        console.error(userError);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("task")
-        .insert({ name: taskName, userId: user.id });
-
-      if (error) {
-        setMessage("Error al guardar tarea");
-        console.error(error);
-      } else {
-        setMessage("Tarea añadida ✅");
-        setTaskname("");
-        console.log(data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
+    const success = await addTask(taskName);
+    if (success) setTaskname("");
   };
 
   return (

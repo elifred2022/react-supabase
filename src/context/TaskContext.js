@@ -3,43 +3,78 @@ import { supabase } from "../supabase/client";
 
 export const TaskContext = createContext();
 
-export const useTask = () => {
-  return useContext(TaskContext);
-};
+export const useTask = () => useContext(TaskContext);
 
 export const TaskContextProvider = ({ children }) => {
-  const [task, setTask] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const getTask = async () => {
+    try {
+      setLoading(true);
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error("Usuario no autenticado");
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("task")
+        .select("*")
+        //.eq("done", false) // Puedes ajustar según necesites
+        .order("id", { ascending: true });
+
+      if (error) throw error;
+
+      setTasks(data);
+    } catch (error) {
+      console.error("Error al obtener tareas:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addTask = async (taskName) => {
     try {
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError) throw userError;
-      console.log("Usuario actual:", user);
+      if (userError || !user) {
+        setMessage("Usuario no autenticado");
+        console.error(userError);
+        return false;
+      }
 
-      const { data, error } = await supabase
-        .from("task") // nombre de la tabla
-        .select("*") // selecciona todas las columnas
-        .eq("done", true); // solo tareas con done=true
+      const { error } = await supabase
+        .from("task")
+        .insert({ name: taskName, userId: user.id });
 
-      if (error) throw error;
+      if (error) {
+        setMessage("Error al guardar tarea");
+        console.error(error);
+        return false;
+      }
 
-      setTask(data);
-      console.log("Tareas obtenidas:", data);
-    } catch (error) {
-      console.error("Error al obtener tareas:", error.message);
+      setMessage("Tarea añadida ✅");
+      getTask(); // recarga tareas después de agregar
+      return true;
+    } catch (err) {
+      console.error("Error inesperado:", err);
+      return false;
     }
   };
 
-  useEffect(() => {
-    getTask(); // llamada al montar el componente
-  }, []);
-
   return (
-    <TaskContext.Provider value={{ task, getTask }}>
+    <TaskContext.Provider value={{ tasks, getTask, addTask, loading, message }}>
       {children}
     </TaskContext.Provider>
   );
